@@ -222,10 +222,14 @@ select yn in "Yes" "No"; do
   case $yn in
   Yes)
     echo "Restarting the system"
+    echo "Dont forget to delete SimpleKiosk after reboot"
     reboot
     break
     ;;
-  No) break ;;
+  No)
+    echo "Deleting SimpleKiosk directory"
+    rm -rf SimpleKiosk
+    break ;;
   esac
 done
 
