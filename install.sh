@@ -9,7 +9,7 @@ sudo -v
 while true; do
   sudo -n true
   sleep 60
-  kill -0 "$$" || exit
+  kill -0 "$$" || exit 0
 done 2>/dev/null &
 
 # Update Sources list
@@ -76,7 +76,7 @@ fi
 
 # Ask user if they will be using keyboard or mouse
 echo "Will you be using a keyboard or mouse?"
-select yn in "Keyboard" "Mouse"; do
+select yn in "Keyboard" "Mouse" "No"; do
   case $yn in
   Keyboard)
     echo "Installing xserver-xorg-input-kbd"
@@ -89,6 +89,7 @@ select yn in "Keyboard" "Mouse"; do
     mouse=""
     break
     ;;
+  No) break ;;
   esac
 done
 
