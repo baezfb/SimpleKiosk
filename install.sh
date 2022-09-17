@@ -16,74 +16,74 @@ while true; do
 done 2>/dev/null &
 
 # Update Sources list
-cp sources.list /etc/apt/sources.list
+sudo cp sources.list /etc/apt/sources.list
 
 # Update & Upgrade
-apt-get update && apt-get upgrade -y
+sudo apt-get update && apt-get upgrade -y
 
 # Install UFW Firewall & Enable
-apt-get install ufw -y
-ufw enable
+sudo apt-get install ufw -y
+sudo ufw enable
 
 # Ask user if they would be using ssh
 read -p "Would you be using ssh? (y/n) " -n 1 -r
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   # Enable SSH
-  ufw allow ssh
+  sudo ufw allow ssh
 fi
 
 # Install Fail2Ban & Enable
-apt-get install fail2ban -y
-systemctl enable fail2ban
+sudo apt-get install fail2ban -y
+sudo systemctl enable fail2ban
 
 # Fail2Ban Config
-cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
-cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-service fail2ban restart
+sudo cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo service fail2ban restart
 
 # Install NetworkManager
-apt-get install network-manager -y
+sudo apt-get install network-manager -y
 
 # Install iwlwifi-firmware
-apt-get install firmware-iwlwifi -y
+sudo apt-get install firmware-iwlwifi -y
 
 # Install lshw and run it
-apt-get install lshw -y
+sudo apt-get install lshw -y
 lshw -short >"$HOME"/lshw.html
 
 # Install hwinfo and run it
-apt-get install hwinfo -y
+sudo apt-get install hwinfo -y
 hwinfo --short >"$HOME"/hwinfo.html
 
 # Install Chromium
-apt-get install chromium -y
+sudo apt-get install chromium -y
 
 # Install Core xserver packages
-apt-get install xserver-xorg-core xinit x11-xserver-utils -y
+sudo apt-get install xserver-xorg-core xinit x11-xserver-utils -y
 
 # Find out what video card you have
 lspci | grep -i vga
 
 # Ask user what video card they have
 echo "What video card do you have? (nvidia, intel, via, amd, generic)"
-read videocard
+read -r videocard
 
 # Install video card drivers  (nvidia, intel, via, amd, generic)
 if [ "$videocard" = "nvidia" ]; then
-  apt-get install xserver-xorg-video-nouveau -y
+  sudo apt-get install xserver-xorg-video-nouveau -y
 elif [ "$videocard" = "intel" ]; then
-  apt-get install xserver-xorg-video-intel -y
+  sudo apt-get install xserver-xorg-video-intel -y
 elif [ "$videocard" = "via" ]; then
-  apt-get install xserver-xorg-video-openchrome -y
+  sudo apt-get install xserver-xorg-video-openchrome -y
 elif [ "$videocard" = "amd" ]; then
-  apt-get install xserver-xorg-video-radeon -y
+  sudo apt-get install xserver-xorg-video-radeon -y
 elif [ "$videocard" = "generic" ]; then
-  apt-get install xserver-xorg-video-vesa -y
+  sudo apt-get install xserver-xorg-video-vesa -y
 else
   echo "Invalid video card"
   echo "Installing generic video drivers"
-  apt-get install xserver-xorg-video-vesa -y
+  sudo apt-get install xserver-xorg-video-vesa -y
 fi
 
 # Ask user if they will be using keyboard or mouse
@@ -92,12 +92,12 @@ select yn in "Keyboard" "Mouse" "No"; do
   case $yn in
   Keyboard)
     echo "Installing xserver-xorg-input-kbd"
-    apt-get install xserver-xorg-input-kbd -y
+    sudo apt-get install xserver-xorg-input-kbd -y
     break
     ;;
   Mouse)
     echo "Installing xserver-xorg-input-mouse"
-    apt-get install xserver-xorg-input-mouse -y
+    sudo apt-get install xserver-xorg-input-mouse -y
     mouse=""
     break
     ;;
@@ -111,7 +111,7 @@ select yn in "Yes" "No"; do
   case $yn in
   Yes)
     echo "Installing xserver-xorg-input-evdev & xserver-xorg-input-synaptics"
-    apt-get install xserver-xorg-input-evdev xserver-xorg-input-synaptics -y
+    sudo apt-get install xserver-xorg-input-evdev xserver-xorg-input-synaptics -y
     break
     ;;
   No) break ;;
@@ -124,7 +124,7 @@ select yn in "Yes" "No"; do
   case $yn in
   Yes)
     echo "Installing additional recommended packages"
-    apt-get install xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
+    sudo apt-get install xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
     break
     ;;
   No) break ;;
@@ -137,18 +137,18 @@ if id -u guest >/dev/null 2>&1; then
 else
   echo "Guest user does not exist"
   # Create a guest user
-  adduser guest -m -s /bin/sh guest
+  sudo adduser guest -m -s /bin/sh guest
   # Set guest user password
-  passwd guest
+  sudo passwd guest
 fi
 
 # Check if guest user in /bin/bash
-if grep -q "/bin/bash" /etc/passwd; then
+if sudo grep -q "/bin/bash" /etc/passwd; then
   echo "Guest user is in /bin/bash"
 else
   echo "Guest user is not in /bin/bash"
   # Change guest user shell to /bin/bash
-  usermod -s /bin/bash guest
+  sudo usermod -s /bin/bash guest
 fi
 
 # Autologin guest user
@@ -223,7 +223,7 @@ select yn in "Yes" "No"; do
   Yes)
     echo "Restarting the system"
     echo "Dont forget to delete SimpleKiosk after reboot"
-    reboot
+    sudo reboot
     break
     ;;
   No)
