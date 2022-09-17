@@ -2,6 +2,9 @@
 
 mouse="-- -nocursor"
 
+# Get the current username
+user=$(whoami)
+
 # Ask for the administrator password upfront
 sudo -v
 
@@ -119,14 +122,31 @@ select yn in "Yes" "No"; do
   esac
 done
 
-# Create a guest user
-adduser guest -m -s /bin/sh guest
+# Check if guest user exists
+if id -u guest >/dev/null 2>&1; then
+  echo "Guest user exists"
+else
+  echo "Guest user does not exist"
+  # Create a guest user
+  adduser guest -m -s /bin/sh guest
+  # Set guest user password
+  passwd guest
+fi
 
-# Add bash shell to guest user
-usrmod -s /bin/bash guest
+# Check if guest user in /bin/bash
+if grep -q "/bin/bash" /etc/passwd; then
+  echo "Guest user is in /bin/bash"
+else
+  echo "Guest user is not in /bin/bash"
+  # Change guest user shell to /bin/bash
+  usermod -s /bin/bash guest
+fi
 
-# Set guest user password
-passwd guest
+# Autologin guest user
+echo "[Service]
+      ExecStart=
+      ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $TERM
+      Type=idle" >>/lib/systemd/system/getty@tty1.service
 
 # Switch to guest user
 su -c guest
@@ -164,14 +184,8 @@ select yn in "Website" "Application"; do
   esac
 done
 
-# Exit guest user
-exit
-
-# Add the following to getty@tty1.service
-echo "[Service]
-      ExecStart=
-      ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $TERM
-      Type=idle" >>/lib/systemd/system/getty@tty1.service
+# Switch back to original user
+su -c "$user"
 
 # Ask user if they would like to restart the system
 echo "Would you like to restart the system?"
