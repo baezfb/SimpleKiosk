@@ -25,6 +25,14 @@ apt-get update && apt-get upgrade -y
 apt-get install ufw -y
 ufw enable
 
+# Ask user if they would be using ssh
+read -p "Would you be using ssh? (y/n) " -n 1 -r
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Enable SSH
+  ufw allow ssh
+fi
+
 # Install Fail2Ban & Enable
 apt-get install fail2ban -y
 systemctl enable fail2ban
@@ -40,11 +48,12 @@ apt-get install network-manager -y
 # Install iwlwifi-firmware
 apt-get install firmware-iwlwifi -y
 
-# Install lshw and hwinfo
-apt-get install lshw hwinfo -y
-
-# Run lshw and hwinfo
+# Install lshw and run it
+apt-get install lshw -y
 lshw -short >"$HOME"/lshw.html
+
+# Install hwinfo and run it
+apt-get install hwinfo -y
 hwinfo --short >"$HOME"/hwinfo.html
 
 # Install Chromium
@@ -154,16 +163,36 @@ su -c guest
 # Change to guest user home directory
 cd ~ || exit
 
-# Create .bash_profile
-touch .bash_profile
+# Check if .bash_profile exists
+if [ -f .bash_profile ]; then
+  echo ".bash_profile exists"
+  # Remove .bash_profile
+  rm .bash_profile
+  # Create .bash_profile
+  touch .bash_profile
+else
+  echo ".bash_profile does not exist"
+  # Create .bash_profile
+  touch .bash_profile
+fi
 
 # Add .bash_profile contents
 echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
        startx $mouse
       fi" >>.bash_profile
 
-# Create .xinitrc
-touch .xinitrc
+# Check if .xinitrc exists
+if [ -f .xinitrc ]; then
+  echo ".xinitrc exists"
+  # Remove .xinitrc
+  rm .xinitrc
+  # Create .xinitrc
+  touch .xinitrc
+else
+  echo ".xinitrc does not exist"
+  # Create .xinitrc
+  touch .xinitrc
+fi
 
 # Ask user if they would be using a website or application
 echo "Will you be using a website or application?"

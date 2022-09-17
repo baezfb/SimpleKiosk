@@ -3,7 +3,7 @@
 SimpleKiosk is a lightweight Debian-based Linux operating system for kiosk applications.
 
 ## Requirements
-Minimal Debian 10 installation (No GUI) with the following packages installed:
+Minimal Debian 10 installation (Net-Install with No GUI) with the following packages installed:
 - Git
 - SSH Server (optional if you want to manage the device remotely)
 
