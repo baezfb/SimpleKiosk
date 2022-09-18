@@ -178,6 +178,9 @@ else
   sudo usermod -s /bin/bash guest
 fi
 
+# Create systemd/system file for guest user
+sudo touch /etc/systemd/system/getty@tty1.service
+
 # Autologin guest user
 echo "[Service]
       ExecStart=
