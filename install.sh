@@ -19,7 +19,7 @@ user=$(whoami)
 sudo cp sources.list /etc/apt/sources.list
 
 # Update & Upgrade
-sudo apt-get update && apt-get upgrade -y
+sudo apt-get update && sudo apt-get upgrade -y
 
 # Ask user if they would be using ssh
 read -p "Would you be using ssh? (y/n) " -n 1 -r
