@@ -147,7 +147,6 @@ done
 
 # Add guest user
 useradd -m -s /bin/bash guest
-usermod -s /bin/sh guest
 passwd guest
 
 # Autologin guest user
