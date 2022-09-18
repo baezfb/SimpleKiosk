@@ -72,22 +72,27 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
   Nvidia)
     # Install Nvidia Drivers
     sudo apt-get install xserver-xorg-video-nouveau -y
+    break
     ;;
   Intel)
     # Install Intel Drivers
     sudo apt-get install xserver-xorg-video-intel -y
+    break
     ;;
   VIA)
     # Install VIA Drivers
     sudo apt-get install xserver-xorg-video-openchrome -y
+    break
     ;;
   AMD)
     # Install AMD Drivers
     sudo apt-get install xserver-xorg-video-radeon -y
+    break
     ;;
   Generic)
     # Install Generic Drivers
     sudo apt-get install xserver-xorg-video-vesa -y
+    break
     ;;
   ALL)
     # Confirm install of all drivers
