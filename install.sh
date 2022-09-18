@@ -164,7 +164,7 @@ if id -u guest >/dev/null 2>&1; then
 else
   echo "Guest user does not exist"
   # Create a guest user
-  sudo useradd guest -m -s /bin/sh guest
+  sudo useradd -m -s /bin/sh guest
   # Set guest user password
   sudo passwd guest
 fi
