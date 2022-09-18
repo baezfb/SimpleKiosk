@@ -103,6 +103,7 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
         ;;
       esac
     done
+    break
     ;;
   esac
 done
