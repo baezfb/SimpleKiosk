@@ -43,7 +43,7 @@ cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
 service fail2ban restart
 
 # Install NetworkManager
-apt-get install -y network-manager firmware-realtek firmware-iwlwifi
+apt-get install -y network-manager firmware-realtek firmware-iwlwifi firmware-amd-graphics
 
 # Install iwlwifi-firmware
 sudo apt-get install -y firmware-iwlwifi -y
@@ -71,27 +71,27 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
   case $yn in
   Nvidia)
     # Install Nvidia Drivers
-    apt-get install xserver-xorg-video-nouveau -y
+    apt-get install -y xserver-xorg-video-nouveau
     break
     ;;
   Intel)
     # Install Intel Drivers
-    apt-get install xserver-xorg-video-intel -y
+    apt-get install -y xserver-xorg-video-intel
     break
     ;;
   VIA)
     # Install VIA Drivers
-    apt-get install xserver-xorg-video-openchrome -y
+    apt-get install -y xserver-xorg-video-openchrome
     break
     ;;
   AMD)
     # Install AMD Drivers
-    apt-get install xserver-xorg-video-radeon -y
+    apt-get install-y xserver-xorg-video-radeon
     break
     ;;
   Generic)
     # Install Generic Drivers
-    apt-get install xserver-xorg-video-vesa -y
+    apt-get install -y xserver-xorg-video-vesa
     break
     ;;
   ALL)
@@ -101,7 +101,7 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
       case $yn in
       Yes)
         # Install all drivers
-        apt-get install xserver-xorg-video-all -y
+        apt-get install -y xserver-xorg-video-all
         ;;
       No)
         break
@@ -119,12 +119,12 @@ select yn in "Keyboard" "Mouse" "No"; do
   case $yn in
   Keyboard)
     echo "Installing xserver-xorg-input-kbd"
-    apt-get install xserver-xorg-input-kbd -y
+    apt-get install -y xserver-xorg-input-kbd
     break
     ;;
   Mouse)
     echo "Installing xserver-xorg-input-mouse"
-    apt-get install xserver-xorg-input-mouse -y
+    apt-get install -y xserver-xorg-input-mouse
     mouse=""
     break
     ;;
@@ -138,7 +138,7 @@ select yn in "Yes" "No"; do
   case $yn in
   Yes)
     echo "Installing xserver-xorg-input-evdev & xserver-xorg-input-synaptics"
-    apt-get install xserver-xorg-input-evdev xserver-xorg-input-synaptics -y
+    apt-get install -y xserver-xorg-input-evdev xserver-xorg-input-synaptics
     break
     ;;
   No) break ;;
@@ -151,7 +151,7 @@ select yn in "Yes" "No"; do
   case $yn in
   Yes)
     echo "Installing additional recommended packages"
-    apt-get install xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
+    apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
     break
     ;;
   No) break ;;
@@ -164,7 +164,7 @@ if id -u guest >/dev/null 2>&1; then
 else
   echo "Guest user does not exist"
   # Create a guest user
-  seradd -m -s /bin/sh guest
+  useradd -m -s /bin/sh guest
   # Set guest user password
   passwd guest
 fi
