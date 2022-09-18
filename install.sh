@@ -182,16 +182,19 @@ fi
 touch /etc/systemd/system/getty@tty1.service
 
 # Autologin guest user
+term=$($TERM)
 echo "[Service]
 ExecStart=
-ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $TERM
+ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $term
 Type=idle" | tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
 # Create .bash_profile for guest user
 touch /home/guest/.bash_profile
 
 # Add .bash_profile contents
-echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
+display=$($DISPLAY)
+tty=$(tty)
+echo "if [[ -z $display ]] && [[ $tty = /dev/tty1 ]]; then
  startx $mouse
 fi" | tee -a /home/guest/.bash_profile >/dev/null
 
