@@ -189,7 +189,7 @@ Type=idle" | sudo tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
 ## Switch to guest user
 #su -c guest
-sudo su - guest
+sudo su -c guest
 
 # Change to guest user home directory
 cd /home/guest || exit
