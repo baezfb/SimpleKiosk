@@ -157,23 +157,16 @@ done
 
 # Add guest user
 useradd -m -s /bin/bash guest
+usermod -s /bin/sh guest
 passwd guest
+
+# Autologin guest user
+cp /home/"$user"/SimpleKiosk/autologin.conf /lib/systemd/system/getty@tty1.servie
 
 su -c guest
 
-# Autologin guest user
-echo -e "[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I '\e'$TERM
-Type=idle" | tee -a /lib/systemd/system/getty@tty1.service >/dev/null
-
 # Create .bash_profile for guest user
-touch /home/guest/.bash_profile
-
-# Add .bash_profile contents
-echo -e "if [[ -z '\e'$DISPLAY]] && [[ '\e'$(tty) = /dev/tty1 ]]; then
- startx $mouse
-fi" | tee /home/guest/.bash_profile >/dev/null
+cp /home/"$user"/SimpleKiosk/.bash_profile /home/guest/.bash_profile
 
 touch /home/guest/.xinitrc
 
@@ -184,13 +177,21 @@ select yn in "Website" "Application"; do
   Website)
     echo "What website would you like to use?"
     read -r website
-    echo "exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
+    echo "#!/bin/bash
+    xset -dpms
+    xset s off
+    xset s noblank
+    exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
     break
     ;;
   Application)
     echo "What application would you like to use?"
     read -r application
-    echo "exec $application" >>.xinitrc
+    echo "#!/bin/bash
+    xset -dpms
+    xset s off
+    xset s noblank
+    exec $application" >>.xinitrc
     break
     ;;
   esac
