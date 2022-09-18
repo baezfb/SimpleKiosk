@@ -5,16 +5,6 @@ mouse="-- -nocursor"
 # Get the current username
 user=$(whoami)
 
-## Ask for the administrator password upfront
-#sudo -v
-
-# Keep-alive: update existing `sudo` time stamp until `install.sh` has finished
-#while true; do
-#  sudo -n true
-#  sleep 60
-#  kill -0 "$$" || exit 0
-#done 2>/dev/null &
-
 # Update Sources list
 cp sources.list /etc/apt/sources.list
 
