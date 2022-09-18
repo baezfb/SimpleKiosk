@@ -86,7 +86,7 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
     ;;
   AMD)
     # Install AMD Drivers
-    apt-get install-y xserver-xorg-video-radeon
+    apt-get install -y xserver-xorg-video-radeon
     break
     ;;
   Generic)
