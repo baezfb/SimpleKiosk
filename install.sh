@@ -189,7 +189,7 @@ Type=idle" | sudo tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
 ## Switch to guest user
 #su -c guest
-sudo su -c guest
+sudo su -c - guest
 
 # Change to guest user home directory
 cd /home/guest || exit
@@ -198,13 +198,13 @@ cd /home/guest || exit
 if [ -f .bash_profile ]; then
   echo ".bash_profile exists"
   # Remove .bash_profile
-  su - guest -c "rm .bash_profile"
+  rm .bash_profile
   # Create .bash_profile
-  su - guest -c "touch .bash_profile"
+  touch .bash_profile
 else
   echo ".bash_profile does not exist"
   # Create .bash_profile
-  su - guest -c "touch .bash_profile"
+  touch .bash_profile
 fi
 
 # Add .bash_profile contents
