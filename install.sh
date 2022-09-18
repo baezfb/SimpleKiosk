@@ -189,44 +189,14 @@ Type=idle" | sudo tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
 ## Switch to guest user
 #su -c guest
-sudo su -c - guest
-
-# Change to guest user home directory
-cd /home/guest || exit
-
-# Check if .bash_profile exists
-if [ -f .bash_profile ]; then
-  echo ".bash_profile exists"
-  # Remove .bash_profile
-  rm .bash_profile
-  # Create .bash_profile
-  touch .bash_profile
-else
-  echo ".bash_profile does not exist"
-  # Create .bash_profile
-  touch .bash_profile
-fi
+su -c - guest cd /home/guest
+su -c - guest touch .bash_profile
+su -c - guest touch .xinitrc
 
 # Add .bash_profile contents
-echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
+su -c - guest echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
  startx $mouse
-fi" >>.bash_profile
-
-# Check if .xinitrc exists
-if [ -f .xinitrc ]; then
-  echo ".xinitrc exists"
-  # Remove .xinitrc
-  echo "Removing .xinitrc"
-  rm .xinitrc
-  # Create .xinitrc
-  echo "Creating .xinitrc"
-  touch .xinitrc
-else
-  echo ".xinitrc does not exist"
-  echo "Creating .xinitrc"
-  # Create .xinitrc
-  touch .xinitrc
-fi
+fi" >>/home/guest/.bash_profile
 
 # Ask user if they would be using a website or application
 echo "Will you be using a website or application?"
@@ -235,20 +205,20 @@ select yn in "Website" "Application"; do
   Website)
     echo "What website would you like to use?"
     read -r website
-    echo "exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>.xinitrc
+    su -c - guest echo "exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
     break
     ;;
   Application)
     echo "What application would you like to use?"
     read -r application
-    echo "exec $application" >>.xinitrc
+    su -c - guest echo "exec $application" >>.xinitrc
     break
     ;;
   esac
 done
 
 # Switch back to original user
-su -c "$user"
+sudo su -c "$user"
 
 # Ask user if they would like to restart the system
 echo "Would you like to restart the system?"
