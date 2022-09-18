@@ -43,10 +43,7 @@ cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
 service fail2ban restart
 
 # Install NetworkManager
-apt-get install -y network-manager firmware-realtek firmware-iwlwifi firmware-amd-graphics
-
-# Install iwlwifi-firmware
-sudo apt-get install -y firmware-iwlwifi -y
+apt-get install -y network-manager firmware-realtek firmware-iwlwifi
 
 # Install lshw and run it
 apt-get install -y lshw
@@ -86,7 +83,7 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
     ;;
   AMD)
     # Install AMD Drivers
-    apt-get install -y xserver-xorg-video-radeon
+    apt-get install -y xserver-xorg-video-radeon firmware-amd-graphics
     break
     ;;
   Generic)
@@ -158,45 +155,25 @@ select yn in "Yes" "No"; do
   esac
 done
 
-# Check if guest user exists
-if id -u guest >/dev/null 2>&1; then
-  echo "Guest user exists"
-else
-  echo "Guest user does not exist"
-  # Create a guest user
-  useradd -m -s /bin/sh guest
-  # Set guest user password
-  passwd guest
-fi
+# Add guest user
+useradd -m -s /bin/bash guest
+passwd guest
 
-# Check if guest user in /bin/bash
-if grep -q "/bin/bash" /etc/passwd; then
-  echo "Guest user is in /bin/bash"
-else
-  echo "Guest user is not in /bin/bash"
-  # Change guest user shell to /bin/bash
-  usermod -s /bin/bash guest
-fi
-
-# Create systemd/system file for guest user
-touch /etc/systemd/system/getty@tty1.service
+su -c guest
 
 # Autologin guest user
-term=$($TERM)
-echo "[Service]
+echo -e "[Service]
 ExecStart=
-ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $term
+ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I '\e'$TERM
 Type=idle" | tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
 # Create .bash_profile for guest user
 touch /home/guest/.bash_profile
 
 # Add .bash_profile contents
-display=$($DISPLAY)
-tty=$(tty)
-echo "if [[ -z $display ]] && [[ $tty = /dev/tty1 ]]; then
+echo -e "if [[ -z '\e'$DISPLAY]] && [[ '\e'$(tty) = /dev/tty1 ]]; then
  startx $mouse
-fi" | tee -a /home/guest/.bash_profile >/dev/null
+fi" | tee /home/guest/.bash_profile >/dev/null
 
 touch /home/guest/.xinitrc
 
@@ -221,6 +198,8 @@ done
 
 # Change ownership of guest user files
 chown -R guest:guest /home/guest
+
+su -c "$user"
 
 # Ask user if they would like to restart the system
 echo "Would you like to restart the system?"
