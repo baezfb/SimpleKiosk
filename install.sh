@@ -183,33 +183,34 @@ sudo touch /etc/systemd/system/getty@tty1.service
 
 # Autologin guest user
 echo "[Service]
-      ExecStart=
-      ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $TERM
-      Type=idle" | sudo tee -a /lib/systemd/system/getty@tty1.service >/dev/null
+ExecStart=
+ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $TERM
+Type=idle" | sudo tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
-# Switch to guest user
-su -c guest
+## Switch to guest user
+#su -c guest
+sudo su - guest
 
 # Change to guest user home directory
-cd ~ || exit
+cd /home/guest || exit
 
 # Check if .bash_profile exists
 if [ -f .bash_profile ]; then
   echo ".bash_profile exists"
   # Remove .bash_profile
-  rm .bash_profile
+  su - guest -c "rm .bash_profile"
   # Create .bash_profile
-  touch .bash_profile
+  su - guest -c "touch .bash_profile"
 else
   echo ".bash_profile does not exist"
   # Create .bash_profile
-  touch .bash_profile
+  su - guest -c "touch .bash_profile"
 fi
 
 # Add .bash_profile contents
 echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
-       startx $mouse
-      fi" >>.bash_profile
+ startx $mouse
+fi" >>.bash_profile
 
 # Check if .xinitrc exists
 if [ -f .xinitrc ]; then
