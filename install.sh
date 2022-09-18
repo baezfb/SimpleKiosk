@@ -185,7 +185,7 @@ sudo touch /etc/systemd/system/getty@tty1.service
 echo "[Service]
       ExecStart=
       ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $TERM
-      Type=idle" >>/lib/systemd/system/getty@tty1.service
+      Type=idle" | sudo tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
 # Switch to guest user
 su -c guest
