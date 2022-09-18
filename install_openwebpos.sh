@@ -28,29 +28,14 @@ touch /home/"$user"/openwebpos/wsgi.py
 
 # Add the OpenWebPOS wsgi file contents
 echo "from openwebpos import open_web_pos
-      app = open_web_pos()
-      if __name__ == '__main__':
-      app.run()" >>/home/"$user"/openwebpos/wsgi.py
+app = open_web_pos()
+if __name__ == '__main__':
+  app.run()" >>/home/"$user"/openwebpos/wsgi.py
 
 deactivate
 
 # Create the OpenWebPOS systemd service file
-sudo touch /etc/systemd/system/openwebpos.service
-
-# Add the OpenWebPOS systemd service file contents
-echo "[Unit]
-      Description=Gunicorn instance to serve OpenWebPOS
-      After=network.target
-
-      [Service]
-      User=$user
-      Group=www-data
-      WorkingDirectory=/home/$user/openwebpos" >>/etc/systemd/system/openwebpos.service
-echo "Environment=""PATH=/home/$user/openwebpos/venv/bin""
-      ExecStart=/home/$user/openwebpos/venv/bin/gunicorn --bind unix:openwebpos.sock wsgi:app
-
-      [Install]
-      WantedBy=multi-user.target" >>/etc/systemd/system/openwebpos.service
+sudo cp /home/"$user"/SimpleKiosk/openwebpos.service /etc/systemd/system/openwebpos.service
 
 # Start the OpenWebPOS systemd service
 sudo systemctl start openwebpos
@@ -59,18 +44,7 @@ sudo systemctl start openwebpos
 sudo systemctl enable openwebpos
 
 # Configure Nginx
-sudo touch /etc/nginx/sites-available/openwebpos
-
-# Add the Nginx configuration file contents
-echo "server {
-        listen 80;
-        server_name $machine_ip;
-
-        location / {
-          include proxy_params;
-          proxy_pass http://unix:/home/$user/openwebpos/openwebpos.sock;
-        }
-      }" >>/etc/nginx/sites-available/openwebpos
+sudo cp /home/"$user"/SimpleKiosk/nginx.conf /etc/nginx/sites-available/openwebpos
 
 # Enable the Nginx configuration file
 sudo ln -s /etc/nginx/sites-available/openwebpos /etc/nginx/sites-enabled
