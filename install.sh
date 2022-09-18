@@ -9,11 +9,11 @@ user=$(whoami)
 #sudo -v
 
 # Keep-alive: update existing `sudo` time stamp until `install.sh` has finished
-while true; do
-  sudo -n true
-  sleep 60
-  kill -0 "$$" || exit 0
-done 2>/dev/null &
+#while true; do
+#  sudo -n true
+#  sleep 60
+#  kill -0 "$$" || exit 0
+#done 2>/dev/null &
 
 # Update Sources list
 sudo cp sources.list /etc/apt/sources.list
