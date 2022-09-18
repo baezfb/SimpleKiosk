@@ -16,51 +16,51 @@ user=$(whoami)
 #done 2>/dev/null &
 
 # Update Sources list
-sudo cp sources.list /etc/apt/sources.list
+cp sources.list /etc/apt/sources.list
 
 # Update & Upgrade
-sudo apt-get update && sudo apt-get upgrade -y
+apt-get update && apt-get -y upgrade
 
 # Ask user if they would be using ssh
 read -p "Would you be using ssh? (y/n) " -n 1 -r
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   # Install UFW Firewall
-  sudo apt-get install ufw -y
+  apt-get install -y ufw
   # Install OpenSSH Server
-  sudo ufw enable
+  ufw enable
   # Enable SSH
-  sudo ufw allow SSH
+  ufw allow SSH
 fi
 
 # Install Fail2Ban & Enable
-sudo apt-get install fail2ban -y
-sudo systemctl enable fail2ban
+apt-get install -y fail2ban
+systemctl enable fail2ban
 
 # Fail2Ban Config
-sudo cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
-sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-sudo service fail2ban restart
+cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
+cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+service fail2ban restart
 
 # Install NetworkManager
-sudo apt-get install network-manager -y
+apt-get install -y network-manager firmware-realtek firmware-iwlwifi
 
 # Install iwlwifi-firmware
-sudo apt-get install firmware-iwlwifi -y
+sudo apt-get install -y firmware-iwlwifi -y
 
 # Install lshw and run it
-sudo apt-get install lshw -y
+apt-get install -y lshw
 lshw -short >"$HOME"/lshw.html
 
 # Install hwinfo and run it
-sudo apt-get install hwinfo -y
+apt-get install -y hwinfo
 hwinfo --short >"$HOME"/hwinfo.html
 
 # Install Chromium
-sudo apt-get install chromium -y
+apt-get install -y chromium
 
 # Install Core xserver packages
-sudo apt-get install xserver-xorg-core xinit x11-xserver-utils -y
+apt-get install -y xserver-xorg-core xinit x11-xserver-utils
 
 # Find out what video card you have
 lspci | grep -i vga
@@ -71,27 +71,27 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
   case $yn in
   Nvidia)
     # Install Nvidia Drivers
-    sudo apt-get install xserver-xorg-video-nouveau -y
+    apt-get install xserver-xorg-video-nouveau -y
     break
     ;;
   Intel)
     # Install Intel Drivers
-    sudo apt-get install xserver-xorg-video-intel -y
+    apt-get install xserver-xorg-video-intel -y
     break
     ;;
   VIA)
     # Install VIA Drivers
-    sudo apt-get install xserver-xorg-video-openchrome -y
+    apt-get install xserver-xorg-video-openchrome -y
     break
     ;;
   AMD)
     # Install AMD Drivers
-    sudo apt-get install xserver-xorg-video-radeon -y
+    apt-get install xserver-xorg-video-radeon -y
     break
     ;;
   Generic)
     # Install Generic Drivers
-    sudo apt-get install xserver-xorg-video-vesa -y
+    apt-get install xserver-xorg-video-vesa -y
     break
     ;;
   ALL)
@@ -101,7 +101,7 @@ select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
       case $yn in
       Yes)
         # Install all drivers
-        sudo apt-get install xserver-xorg-video-all -y
+        apt-get install xserver-xorg-video-all -y
         ;;
       No)
         break
@@ -119,12 +119,12 @@ select yn in "Keyboard" "Mouse" "No"; do
   case $yn in
   Keyboard)
     echo "Installing xserver-xorg-input-kbd"
-    sudo apt-get install xserver-xorg-input-kbd -y
+    apt-get install xserver-xorg-input-kbd -y
     break
     ;;
   Mouse)
     echo "Installing xserver-xorg-input-mouse"
-    sudo apt-get install xserver-xorg-input-mouse -y
+    apt-get install xserver-xorg-input-mouse -y
     mouse=""
     break
     ;;
@@ -138,7 +138,7 @@ select yn in "Yes" "No"; do
   case $yn in
   Yes)
     echo "Installing xserver-xorg-input-evdev & xserver-xorg-input-synaptics"
-    sudo apt-get install xserver-xorg-input-evdev xserver-xorg-input-synaptics -y
+    apt-get install xserver-xorg-input-evdev xserver-xorg-input-synaptics -y
     break
     ;;
   No) break ;;
@@ -151,7 +151,7 @@ select yn in "Yes" "No"; do
   case $yn in
   Yes)
     echo "Installing additional recommended packages"
-    sudo apt-get install xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
+    apt-get install xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
     break
     ;;
   No) break ;;
@@ -164,39 +164,38 @@ if id -u guest >/dev/null 2>&1; then
 else
   echo "Guest user does not exist"
   # Create a guest user
-  sudo useradd -m -s /bin/sh guest
+  seradd -m -s /bin/sh guest
   # Set guest user password
-  sudo passwd guest
+  passwd guest
 fi
 
 # Check if guest user in /bin/bash
-if sudo grep -q "/bin/bash" /etc/passwd; then
+if grep -q "/bin/bash" /etc/passwd; then
   echo "Guest user is in /bin/bash"
 else
   echo "Guest user is not in /bin/bash"
   # Change guest user shell to /bin/bash
-  sudo usermod -s /bin/bash guest
+  usermod -s /bin/bash guest
 fi
 
 # Create systemd/system file for guest user
-sudo touch /etc/systemd/system/getty@tty1.service
+touch /etc/systemd/system/getty@tty1.service
 
 # Autologin guest user
 echo "[Service]
 ExecStart=
 ExecStart=-/sbin/agetty --noissue --autologin guest --noclear %I $TERM
-Type=idle" | sudo tee -a /lib/systemd/system/getty@tty1.service >/dev/null
+Type=idle" | tee -a /lib/systemd/system/getty@tty1.service >/dev/null
 
-## Switch to guest user
-#su -c guest
-su -c - guest cd /home/guest
-su -c - guest touch .bash_profile
-su -c - guest touch .xinitrc
+# Create .bash_profile for guest user
+touch /home/guest/.bash_profile
 
 # Add .bash_profile contents
-su -c - guest echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
+echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
  startx $mouse
-fi" >>/home/guest/.bash_profile
+fi" | tee -a /home/guest/.bash_profile >/dev/null
+
+touch /home/guest/.xinitrc
 
 # Ask user if they would be using a website or application
 echo "Will you be using a website or application?"
@@ -205,20 +204,20 @@ select yn in "Website" "Application"; do
   Website)
     echo "What website would you like to use?"
     read -r website
-    su -c - guest echo "exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
+    echo "exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
     break
     ;;
   Application)
     echo "What application would you like to use?"
     read -r application
-    su -c - guest echo "exec $application" >>.xinitrc
+    echo "exec $application" >>.xinitrc
     break
     ;;
   esac
 done
 
-# Switch back to original user
-sudo su -c "$user"
+# Change ownership of guest user files
+chown -R guest:guest /home/guest
 
 # Ask user if they would like to restart the system
 echo "Would you like to restart the system?"
@@ -227,7 +226,7 @@ select yn in "Yes" "No"; do
   Yes)
     echo "Restarting the system"
     echo "Dont forget to delete SimpleKiosk after reboot"
-    wait 5
+    wait 3
     sudo reboot
     break
     ;;
