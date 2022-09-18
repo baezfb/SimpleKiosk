@@ -149,9 +149,6 @@ done
 useradd -m -s /bin/bash guest
 passwd guest
 
-# Autologin guest user
-cp /home/"$user"/SimpleKiosk/autologin.conf /lib/systemd/system/getty@tty1.servie
-
 su -c guest
 
 # Create .bash_profile for guest user
@@ -198,7 +195,11 @@ select yn in "Yes" "No"; do
   Yes)
     echo "Restarting the system"
     echo "Dont forget to delete SimpleKiosk after reboot"
-    wait 3
+    echo "sudo rm -rf SimpleKiosk"
+    echo "***********************"
+    echo "Dont forget to copy contents of autologin.conf to getty@tty1.service"
+    echo "sudo systemctl edit getty@tty1.service"
+    sleep 5
     sudo reboot
     break
     ;;
