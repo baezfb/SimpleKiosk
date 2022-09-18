@@ -5,8 +5,8 @@ mouse="-- -nocursor"
 # Get the current username
 user=$(whoami)
 
-# Ask for the administrator password upfront
-sudo -v
+## Ask for the administrator password upfront
+#sudo -v
 
 # Keep-alive: update existing `sudo` time stamp until `install.sh` has finished
 while true; do
@@ -21,16 +21,16 @@ sudo cp sources.list /etc/apt/sources.list
 # Update & Upgrade
 sudo apt-get update && apt-get upgrade -y
 
-# Install UFW Firewall & Enable
-sudo apt-get install ufw -y
-sudo ufw enable
-
 # Ask user if they would be using ssh
 read -p "Would you be using ssh? (y/n) " -n 1 -r
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Install UFW Firewall
+  sudo apt-get install ufw -y
+  # Install OpenSSH Server
+  sudo ufw enable
   # Enable SSH
-  sudo ufw allow ssh
+  sudo ufw allow SSH
 fi
 
 # Install Fail2Ban & Enable
@@ -66,25 +66,46 @@ sudo apt-get install xserver-xorg-core xinit x11-xserver-utils -y
 lspci | grep -i vga
 
 # Ask user what video card they have
-echo "What video card do you have? (nvidia, intel, via, amd, generic)"
-read -r videocard
-
-# Install video card drivers  (nvidia, intel, via, amd, generic)
-if [ "$videocard" = "nvidia" ]; then
-  sudo apt-get install xserver-xorg-video-nouveau -y
-elif [ "$videocard" = "intel" ]; then
-  sudo apt-get install xserver-xorg-video-intel -y
-elif [ "$videocard" = "via" ]; then
-  sudo apt-get install xserver-xorg-video-openchrome -y
-elif [ "$videocard" = "amd" ]; then
-  sudo apt-get install xserver-xorg-video-radeon -y
-elif [ "$videocard" = "generic" ]; then
-  sudo apt-get install xserver-xorg-video-vesa -y
-else
-  echo "Invalid video card"
-  echo "Installing generic video drivers"
-  sudo apt-get install xserver-xorg-video-vesa -y
-fi
+echo "What video card do you have?"
+select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
+  case $yn in
+  Nvidia)
+    # Install Nvidia Drivers
+    sudo apt-get install xserver-xorg-video-nouveau -y
+    ;;
+  Intel)
+    # Install Intel Drivers
+    sudo apt-get install xserver-xorg-video-intel -y
+    ;;
+  VIA)
+    # Install VIA Drivers
+    sudo apt-get install xserver-xorg-video-openchrome -y
+    ;;
+  AMD)
+    # Install AMD Drivers
+    sudo apt-get install xserver-xorg-video-radeon -y
+    ;;
+  Generic)
+    # Install Generic Drivers
+    sudo apt-get install xserver-xorg-video-vesa -y
+    ;;
+  ALL)
+    # Confirm install of all drivers
+    echo "Are you sure you want to install all drivers?"
+    select yn in "Yes" "No"; do
+      case $yn in
+      Yes)
+        # Install all drivers
+        sudo apt-get install xserver-xorg-video-all -y
+        ;;
+      No)
+        break
+        ;;
+      esac
+    done
+    ;;
+  esac
+done
 
 # Ask user if they will be using keyboard or mouse
 echo "Will you be using a keyboard or mouse?"
@@ -185,11 +206,14 @@ echo "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
 if [ -f .xinitrc ]; then
   echo ".xinitrc exists"
   # Remove .xinitrc
+  echo "Removing .xinitrc"
   rm .xinitrc
   # Create .xinitrc
+  echo "Creating .xinitrc"
   touch .xinitrc
 else
   echo ".xinitrc does not exist"
+  echo "Creating .xinitrc"
   # Create .xinitrc
   touch .xinitrc
 fi
@@ -223,14 +247,20 @@ select yn in "Yes" "No"; do
   Yes)
     echo "Restarting the system"
     echo "Dont forget to delete SimpleKiosk after reboot"
+    wait 5
     sudo reboot
     break
     ;;
   No)
     echo "Deleting SimpleKiosk directory"
     rm -rf SimpleKiosk
-    break ;;
+    break
+    ;;
   esac
 done
+
+echo "SimpleKiosk has finished installing"
+echo "Dont forget to restart the system"
+echo "Goodbye..."
 
 exit 0
