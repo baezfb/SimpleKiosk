@@ -188,6 +188,21 @@ chown -R guest:guest /home/guest
 
 su -c "$user"
 
+# Ask user if they would like to hide the grub menu
+echo "Would you like to hide the grub menu?"
+select yn in "Yes" "No"; do
+  case $yn in
+  Yes)
+    echo "Hiding grub menu"
+    cp /etc/default/grub /etc/default/grub.bak
+    sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+    update-grub
+    break
+    ;;
+  No) break ;;
+  esac
+done
+
 # Ask user if they would like to restart the system
 echo "Would you like to restart the system?"
 select yn in "Yes" "No"; do
