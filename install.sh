@@ -149,10 +149,10 @@ done
 useradd -m -s /bin/bash guest
 passwd guest
 
-su -c guest
-
 # Create .bash_profile for guest user
 cp /home/"$user"/SimpleKiosk/.bash_profile /home/guest/.bash_profile
+
+su -c guest
 
 touch /home/guest/.xinitrc
 
