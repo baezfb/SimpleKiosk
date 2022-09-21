@@ -188,7 +188,7 @@ chown -R guest:guest /home/guest
 
 su -c "$user"
 
-# Ask user if they would like to hide the grub menu
+# Ask user if they would like to hide the grub menu and remove splash screen
 echo "Would you like to hide the grub menu?"
 select yn in "Yes" "No"; do
   case $yn in
@@ -196,6 +196,7 @@ select yn in "Yes" "No"; do
     echo "Hiding grub menu"
     cp /etc/default/grub /etc/default/grub.bak
     sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet"/GRUB_CMDLINE_LINUX_DEFAULT=""/g' /etc/default/grub
     update-grub
     break
     ;;
