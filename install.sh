@@ -93,18 +93,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
 fi
 
-# ask user what browser they would like to install
-read -p "What browser would you like to install? (firefox/chromium) " -n 1 -r
-
-# TODO: add support for chrome
-if [[ $REPLY =~ ^[Ff]$ ]]; then
-  # Install Firefox
-  apt-get install -y firefox
-elif [[ $REPLY =~ ^[Cc]$ ]]; then
-  # Install Chromium
-  apt-get install -y chromium-browser
-fi
-
 # Add a guest user with home directory and bash shell
 useradd -m -s /bin/bash guest
 
@@ -117,18 +105,35 @@ cp "$folder_dir"/.bash_profile /home/guest/.bash_profile
 # Create .xinitrc for guest user
 touch /home/guest/.xinitrc
 
+# Add based data to .xinitrc
+echo "#!/bin/bash
+    xset -dpms
+    xset s off
+    xset s noblank" >>/home/guest/.xinitrc
+
 # Ask user if they would be using a website or application
 echo "Will you be using a website or application?"
 select yn in "Website" "Application"; do
   case $yn in
   Website)
-    echo "What website would you like to use?"
-    read -r website
-    echo "#!/bin/bash
-    xset -dpms
-    xset s off
-    xset s noblank
-    exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
+    # ask user what browser they would like to install
+    read -p "What browser would you like to install? (firefox/chromium) " -n 1 -r
+    if [[ $REPLY =~ ^[Ff]$ ]]; then
+      # Install Firefox
+      apt-get install -y firefox
+      echo "What website would you like to use?"
+      read -r website
+      echo "exec firefox -kiosk -private-window $website" >>/home/guest/.xinitrc
+      break
+    elif [[ $REPLY =~ ^[Cc]$ ]]; then
+      # Install Chromium
+      apt-get install -y chromium-browser
+      echo "What website would you like to use?"
+      read -r website
+      echo "exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
+      break
+    fi
+    # exit the loop
     break
     ;;
   Application)
