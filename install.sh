@@ -1,9 +1,7 @@
 #!/bin/bash
 
-mouse="-- -nocursor"
-
-# Get the current username
-user=$(whoami)
+# Get the current folder directory
+folder_dir=$(pwd)
 
 # Update Sources list
 cp sources.list /etc/apt/sources.list
@@ -23,17 +21,26 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   ufw allow SSH
 fi
 
-# Install Fail2Ban & Enable
-apt-get install -y fail2ban
-systemctl enable fail2ban
+# Ask user if they would like to install fail2ban
+read -p "Would you like to install fail2ban? (y/n) " -n 1 -r
 
-# Fail2Ban Config
-cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
-cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-service fail2ban restart
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Install fail2ban
+  apt-get install -y fail2ban
+  # Copy fail2ban config
+  cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
+  cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+  # Restart fail2ban
+  service fail2ban restart
+  # Enable fail2ban
+  systemctl enable fail2ban
+fi
 
 # Install NetworkManager
-apt-get install -y network-manager firmware-realtek firmware-iwlwifi
+apt-get install -y network-manager firmware-iwlwifi
+
+# TODO: check what network card is installed and install the correct firmware
+# firmware-realtek
 
 # Install lshw and run it
 apt-get install -y lshw
@@ -43,117 +50,71 @@ lshw -short >"$HOME"/lshw.html
 apt-get install -y hwinfo
 hwinfo --short >"$HOME"/hwinfo.html
 
-# Install Chromium
-apt-get install -y chromium
-
 # Install Core xserver packages
 apt-get install -y xserver-xorg-core xinit x11-xserver-utils
 
 # Find out what video card you have
 lspci | grep -i vga
 
-# Ask user what video card they have
-echo "What video card do you have?"
-select yn in "Nvidia" "Intel" "VIA" "AMD" "Generic" "ALL"; do
-  case $yn in
-  Nvidia)
-    # Install Nvidia Drivers
-    apt-get install -y xserver-xorg-video-nouveau
-    break
-    ;;
-  Intel)
-    # Install Intel Drivers
-    apt-get install -y xserver-xorg-video-intel
-    break
-    ;;
-  VIA)
-    # Install VIA Drivers
-    apt-get install -y xserver-xorg-video-openchrome
-    break
-    ;;
-  AMD)
-    # Install AMD Drivers
-    apt-get install -y xserver-xorg-video-radeon firmware-amd-graphics
-    break
-    ;;
-  Generic)
-    # Install Generic Drivers
-    apt-get install -y xserver-xorg-video-vesa
-    break
-    ;;
-  ALL)
-    # Confirm install of all drivers
-    echo "Are you sure you want to install all drivers?"
-    select yn in "Yes" "No"; do
-      case $yn in
-      Yes)
-        # Install all drivers
-        apt-get install -y xserver-xorg-video-all
-        ;;
-      No)
-        break
-        ;;
-      esac
-    done
-    break
-    ;;
-  esac
-done
+# Find out what video card you have and install the correct driver
+lspci | grep -i vga | grep -i intel && apt-get install -y xserver-xorg-video-intel
+lspci | grep -i vga | grep -i nvidia && apt-get install -y xserver-xorg-video-nouveau
+lspci | grep -i vga | grep -i amd && apt-get install -y xserver-xorg-video-ati
 
-# Ask user if they will be using keyboard or mouse
-echo "Will you be using a keyboard or mouse?"
-select yn in "Keyboard" "Mouse" "No"; do
-  case $yn in
-  Keyboard)
-    echo "Installing xserver-xorg-input-kbd"
-    apt-get install -y xserver-xorg-input-kbd
-    break
-    ;;
-  Mouse)
-    echo "Installing xserver-xorg-input-mouse"
-    apt-get install -y xserver-xorg-input-mouse
-    mouse=""
-    break
-    ;;
-  No) break ;;
-  esac
-done
+# Ask user if they would be using a touchsceen
+read -p "Would you be using a touchscreen? (y/n) " -n 1 -r
 
-# Ask user if they will be using a touch screen
-echo "Will you be using a touch screen?"
-select yn in "Yes" "No"; do
-  case $yn in
-  Yes)
-    echo "Installing xserver-xorg-input-evdev & xserver-xorg-input-synaptics"
-    apt-get install -y xserver-xorg-input-evdev xserver-xorg-input-synaptics
-    break
-    ;;
-  No) break ;;
-  esac
-done
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Install Touchscreen Drivers
+  apt-get install -y xserver-xorg-input-evdev xserver-xorg-input-libinput
+fi
+
+# Ask user if they would be using a keyboard
+read -p "Would you be using a keyboard? (y/n) " -n 1 -r
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Install Keyboard Drivers
+  apt-get install -y xserver-xorg-input-synaptics xserver-xorg-input-kbd
+fi
+
+# Ask user if they would be using a mouse
+read -p "Would you be using a mouse? (y/n) " -n 1 -r
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Install Mouse Drivers
+  apt-get install -y xserver-xorg-input-mouse
+fi
 
 # Ask user if they would like to install additional recommended packages
-echo "Would you like to install additional recommended packages?"
-select yn in "Yes" "No"; do
-  case $yn in
-  Yes)
-    echo "Installing additional recommended packages"
-    apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
-    break
-    ;;
-  No) break ;;
-  esac
-done
+read -p "Would you like to install additional recommended packages? (y/n) " -n 1 -r
 
-# Add guest user
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Install additional recommended packages
+  apt-get install -y xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable libgl1-mesa-dri mesa-utils
+fi
+
+# ask user what browser they would like to install
+read -p "What browser would you like to install? (firefox/chromium) " -n 1 -r
+
+# TODO: add support for chrome
+if [[ $REPLY =~ ^[Ff]$ ]]; then
+  # Install Firefox
+  apt-get install -y firefox
+elif [[ $REPLY =~ ^[Cc]$ ]]; then
+  # Install Chromium
+  apt-get install -y chromium-browser
+fi
+
+# Add a guest user with home directory and bash shell
 useradd -m -s /bin/bash guest
-passwd guest
+
+# Set the password for the guest user
+echo "guest:guest" | chpasswd
 
 # Create .bash_profile for guest user
-cp /home/"$user"/SimpleKiosk/.bash_profile /home/guest/.bash_profile
+cp "$folder_dir"/.bash_profile /home/guest/.bash_profile
 
-su -c guest
-
+# Create .xinitrc for guest user
 touch /home/guest/.xinitrc
 
 # Ask user if they would be using a website or application
@@ -186,49 +147,31 @@ done
 # Change ownership of guest user files
 chown -R guest:guest /home/guest
 
-su -c "$user"
+#su -c "$user"
 
 # Ask user if they would like to hide the grub menu and remove splash screen
-echo "Would you like to hide the grub menu?"
-select yn in "Yes" "No"; do
-  case $yn in
-  Yes)
-    echo "Hiding grub menu"
-    cp /etc/default/grub /etc/default/grub.bak
-    sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
-    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet"/GRUB_CMDLINE_LINUX_DEFAULT=""/g' /etc/default/grub
-    update-grub
-    break
-    ;;
-  No) break ;;
-  esac
-done
+read -p "Would you like to hide the grub menu and remove splash screen? (y/n) " -n 1 -r
 
-# Ask user if they would like to restart the system
-echo "Would you like to restart the system?"
-select yn in "Yes" "No"; do
-  case $yn in
-  Yes)
-    echo "Restarting the system"
-    echo "Dont forget to delete SimpleKiosk after reboot"
-    echo "sudo rm -rf SimpleKiosk"
-    echo "***********************"
-    echo "Dont forget to copy contents of autologin.conf to getty@tty1.service"
-    echo "sudo systemctl edit getty@tty1.service"
-    sleep 5
-    sudo reboot
-    break
-    ;;
-  No)
-    echo "Deleting SimpleKiosk directory"
-    rm -rf SimpleKiosk
-    break
-    ;;
-  esac
-done
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # make copy of grub file
+  cp /etc/default/grub /etc/default/grub.bak
+  # Hide grub menu and remove splash screen
+  sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet"/GRUB_CMDLINE_LINUX_DEFAULT=""/g' /etc/default/grub
+  sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/g' /etc/default/grub
+  update-grub
+fi
 
 echo "SimpleKiosk has finished installing"
 echo "Dont forget to restart the system"
-echo "Goodbye..."
+
+# Ask user if they would like to restart the system
+read -p "Would you like to restart the system? (y/n) " -n 1 -r
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Restart the system
+  echo "Goodbye..."
+  sleep 3
+  reboot
+fi
 
 exit 0
