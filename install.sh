@@ -53,15 +53,10 @@ hwinfo --short >"$HOME"/hwinfo.html
 # Install Core xserver packages
 apt-get install -y xserver-xorg-core xinit x11-xserver-utils
 
-# Find out what video card you have
-lspci | grep -i vga
+# Install video drivers
+apt-get install -y xserver-xorg-video-intel xserver-xorg-video-nouveau xserver-xorg-video-ati
 
-# Find out what video card you have and install the correct driver
-lspci | grep -i vga | grep -i intel && apt-get install -y xserver-xorg-video-intel
-lspci | grep -i vga | grep -i nvidia && apt-get install -y xserver-xorg-video-nouveau
-lspci | grep -i vga | grep -i amd && apt-get install -y xserver-xorg-video-ati
-
-# Ask user if they would be using a touchsceen
+# Ask user if they would be using a touchscreen
 read -p "Would you be using a touchscreen? (y/n) " -n 1 -r
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -107,43 +102,26 @@ touch /home/guest/.xinitrc
 
 # Add based data to .xinitrc
 echo "#!/bin/bash
-    xset -dpms
-    xset s off
-    xset s noblank" >>/home/guest/.xinitrc
+xset -dpms
+xset s off
+xset s noblank" >>/home/guest/.xinitrc
 
 # Ask user if they would be using a website or application
 echo "Will you be using a website or application?"
 select yn in "Website" "Application"; do
   case $yn in
   Website)
-    # ask user what browser they would like to install
-    read -p "What browser would you like to install? (firefox/chromium) " -n 1 -r
-    if [[ $REPLY =~ ^[Ff]$ ]]; then
-      # Install Firefox
-      apt-get install -y firefox
-      echo "What website would you like to use?"
-      read -r website
-      echo "exec firefox -kiosk -private-window $website" >>/home/guest/.xinitrc
-      break
-    elif [[ $REPLY =~ ^[Cc]$ ]]; then
-      # Install Chromium
-      apt-get install -y chromium-browser
-      echo "What website would you like to use?"
-      read -r website
-      echo "exec chromium $website --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --disable-features=TranslateUI --disk-cache-dir=/dev/null  --password-store=basic" >>/home/guest/.xinitrc
-      break
-    fi
-    # exit the loop
+    # Ask user for website url
+    read -r -p "What is the website url? " website_url
+    # Install Chromium
+    apt-get install -y chromium-browser
+    # Add website url to .xinitrc
+    echo "exec chromium $website_url --start-fullscreen --kiosk --incognito --noerrdialogs --no-first-run --fast --fast-start --disable-infobars --password-store=basic" >>/home/guest/.xinitrc
     break
     ;;
   Application)
-    echo "What application would you like to use?"
-    read -r application
-    echo "#!/bin/bash
-    xset -dpms
-    xset s off
-    xset s noblank
-    exec $application" >>.xinitrc
+    read -r -p "What is the application name? " application_name
+    echo "exec $application_name" >>.xinitrc
     break
     ;;
   esac
@@ -166,15 +144,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   update-grub
 fi
 
-echo "SimpleKiosk has finished installing"
-echo "Dont forget to restart the system"
-
 # Ask user if they would like to restart the system
 read -p "Would you like to restart the system? (y/n) " -n 1 -r
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   # Restart the system
-  echo "Goodbye..."
   sleep 3
   reboot
 fi
