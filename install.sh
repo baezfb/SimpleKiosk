@@ -10,7 +10,7 @@ cp sources.list /etc/apt/sources.list
 apt-get update && apt-get -y upgrade
 
 # Install non-free packages
-apt-get install -y firmware-linux-nonfree firmware-misc-nonfree firmware-realtek firmware-atheros firmware-iwlwifi firmware-amd-graphics
+apt-get install -y firmware-linux-nonfree firmware-misc-nonfree firmware-realtek firmware-atheros firmware-iwlwifi firmware-amd-graphics linux-modules-extra
 
 # Ask user if they would be using ssh
 read -p "Would you be using ssh? (y/n) " -n 1 -r
