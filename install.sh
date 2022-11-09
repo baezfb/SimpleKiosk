@@ -148,8 +148,10 @@ fi
 read -p "Would you like to restart the system? (y/n) " -n 1 -r
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+  echo "Dont forget to copy contents of autologin.conf to getty@tty1.service"
+  echo "sudo systemctl edit getty@tty1.service"
   # Restart the system
-  sleep 3
+  sleep 5
   reboot
 fi
 
