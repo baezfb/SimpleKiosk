@@ -114,7 +114,7 @@ select yn in "Website" "Application"; do
     # Ask user for website url
     read -r -p "What is the website url? " website_url
     # Install Chromium
-    apt-get install -y chromium-browser
+    apt-get install -y chromium
     # Add website url to .xinitrc
     echo "exec chromium $website_url --start-fullscreen --kiosk --incognito --noerrdialogs --no-first-run --fast --fast-start --disable-infobars --password-store=basic" >>/home/guest/.xinitrc
     break
