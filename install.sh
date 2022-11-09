@@ -9,6 +9,9 @@ cp sources.list /etc/apt/sources.list
 # Update & Upgrade
 apt-get update && apt-get -y upgrade
 
+# Install non-free packages
+apt-get install -y firmware-linux-nonfree firmware-misc-nonfree firmware-realtek firmware-atheros firmware-iwlwifi firmware-amd-graphics
+
 # Ask user if they would be using ssh
 read -p "Would you be using ssh? (y/n) " -n 1 -r
 
@@ -37,10 +40,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # Install NetworkManager
-apt-get install -y network-manager firmware-iwlwifi
-
-# TODO: check what network card is installed and install the correct firmware
-# firmware-realtek
+apt-get install -y network-manager
 
 # Install lshw and run it
 apt-get install -y lshw
