@@ -1,10 +1,28 @@
 #!/bin/bash
 
+# check if the operating system is not Linux
+if [ "$(uname)" != "Linux" ]; then
+  echo "This script is only for Linux"
+  exit 1
+fi
+
+# check if user has root privileges
+if [ "$(id -u)" != "0" ]; then
+  echo "You need to be root to run this script"
+  exit 1
+fi
+
 # Get the current folder directory
 folder_dir=$(pwd)
 
-# Update Sources list
-cp sources.list /etc/apt/sources.list
+# ask user if he wants to update the sources list
+read -p "Do you want to update the sources list? [y/n] " -n 1 -r
+
+# if user wants to update the sources list
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  # Update Sources list
+  cp sources.list /etc/apt/sources.list
+fi
 
 # Update & Upgrade
 apt-get update && apt-get -y upgrade
@@ -39,8 +57,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   systemctl enable fail2ban
 fi
 
-# Install NetworkManager
-apt-get install -y network-manager
+# Install NetworkManager & wireless-tools
+apt-get install -y network-manager wireless-tools
 
 # Install lshw and run it
 apt-get install -y lshw
@@ -116,7 +134,7 @@ select yn in "Website" "Application"; do
     # Install Chromium
     apt-get install -y chromium
     # Add website url to .xinitrc
-    echo "exec chromium $website_url --start-fullscreen --kiosk --incognito --noerrdialogs --no-first-run --fast --fast-start --disable-infobars --password-store=basic" >>/home/guest/.xinitrc
+    echo "exec chromium $website_url --start-fullscreen --kiosk --incognito --noerrdialogs --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter --disable-translate --no-first-run --fast --fast-start --disable-infobars --password-store=basic" >>/home/guest/.xinitrc
     break
     ;;
   Application)
